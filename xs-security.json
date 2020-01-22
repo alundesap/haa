@@ -1,6 +1,6 @@
 {
     "xsappname": "haa",
-    "tenant-mode": "shared",
+    "tenant-mode": "dedicated",
     "scopes": [{
         "name": "$XSAPPNAME.Display",
         "description": "Display"

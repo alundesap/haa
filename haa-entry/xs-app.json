@@ -3,13 +3,13 @@
 	"authenticationMethod": "route",
 	"routes": [{
 		"source": "/sap/bc/ina",
-		"destination": "haa-java",
+		"destination": "HAA_BACKEND",
 		"httpMethods": ["POST", "GET"],
 		"authenticationType": "xsuaa",
 		"scope": "$XSAPPNAME.Display"
 	}, {
 		"source": "/sap/bc/ina",
-		"destination": "haa-java",
+		"destination": "HAA_BACKEND",
 		"httpMethods": ["OPTIONS"],
 		"authenticationType": "none"
 	}, {
