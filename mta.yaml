@@ -1,53 +1,63 @@
 ID: haa
-_schema-version: '2.0'
+_schema-version: '2.0.0'
 version: 0.0.1
 
 modules:
 
- - name: haa-java
+ - name: haa-ina
    type: java
    path: haa-java
    parameters:
-      memory: 1024M
-      buildpack: sap_java_buildpack
+     memory: 800M
+     buildpack: sap_java_buildpack
    properties:
-      TARGET_RUNTIME: tomee
-      JBP_CONFIG_RESOURCE_CONFIGURATION: "['tomee/webapps/ROOT/WEB-INF/resources.xml': {'xsahaa-hdi-container':'sales-hdi'}]"
-      USE_NAMED_USER: true
-      SECONDARY_ROUTING_PERCENT: 0
-      SAP_JWT_TRUST_ACL: '[{"clientid":"sb-haa-java", "identityzone": "*"}]'
+     TARGET_RUNTIME: tomee
+     SAP_JWT_TRUST_ACL: '[{"clientid":"*", "identityzone": "*"}]'
+     JBP_CONFIG_RESOURCE_CONFIGURATION: "['tomee/webapps/ROOT/WEB-INF/resources.xml': {'xsahaa-hdi-container':'CONCILETIME_V0'}]"
    provides:
-    - name: haa-java-api
+    - name: java-xsahaa
       properties:
-         url: ${default-url}
+        url: ${default-url}
    requires:
-    - name: haa-uaa
-    - name: sales-hdi
+    - name: haa-uaa-isveng
+    - name: conciletime-hdb
 
- - name: haa-entry
+ - name: haa-web
    type: nodejs
    path: haa-entry
    parameters:
-      memory: 512M
-      buildpack: nodejs_buildpack
+     memory: 128M
+     buildpack: nodejs_buildpack
    requires:
-    - name: haa-uaa
-    - name: haa-java-api
+    - name: haa-uaa-isveng
+    - name: java-xsahaa
       group: destinations
       properties:
-         name: HAA_BACKEND
-         url: ~{url}
-         forwardAuthToken: true
-         timeout: 600000
+        name: XSAHAA_BACKEND
+        url: ~{url}
+        forwardAuthToken: true
+        timeout: 600000
    properties:
-      CORS: '[{"uriPattern": "^/sap/bc/ina/(.*)$", "allowedOrigin": [{"host":"ateam-isveng.us10.sapanalytics.cloud", "protocol":"https"}], "allowedMethods": ["GET", "POST", "OPTIONS"], "allowedHeaders": ["Origin", "Accept", "X-Requested-With", "Content-Type", "Access-Control-Request-Method", "Access-Control-Request-Headers", "Authorization", "X-Sap-Cid", "X-Csrf-Token"], "exposeHeaders": ["Accept", "Authorization", "X-Requested-With", "X-Sap-Cid", "Access-Control-Allow-Origin", "Access-Control-Allow-Credentials", "X-Csrf-Token", "Content-Type"]}]'
-      INCOMING_CONNECTION_TIMEOUT: 600000
+     CORS: [
+              {
+                "uriPattern": "^/sap/bc/ina/(.*)$", 
+                "allowedOrigin": [{"host":"ateam-isveng.us10.sapanalytics.cloud", "protocol":"https"}
+            ], 
+            "allowedMethods": ["GET", "POST", "HEAD", "OPTIONS", "PUT", "DELETE"],
+            "allowedHeaders": ["Origin", "Accept", "X-Requested-With", "Content-Type", "Access-Control-Request-Method", "Access-Control-Request-Headers", "Authorization", "X-Sap-Cid", "X-Csrf-Token", "Accept-Language"],
+            "exposeHeaders": ["Accept", "Authorization", "X-Requested-With", "X-Sap-Cid", "Access-Control-Allow-Origin", "Access-Control-Allow-Credentials", "X-Csrf-Token", "Content-Type"]
+          }
+        ]
+
+     INCOMING_CONNECTION_TIMEOUT: 600000
 
 resources:
- - name: haa-uaa
+ - name: haa-uaa-isveng
    type: com.sap.xs.uaa
    parameters:
       path: ./xs-security.json
-
- - name: sales-hdi
+ - name: conciletime-hdb
    type: org.cloudfoundry.existing-service
+   parameters:
+      service-name: CONCILETIME_V0
+
